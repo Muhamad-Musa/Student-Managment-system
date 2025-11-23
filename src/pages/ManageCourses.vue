@@ -295,4 +295,104 @@ input:focus {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .page {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .form-section,
+[data-theme="dark"] .list-section {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] label {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] input {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] input::placeholder {
+  color: #666;
+}
+
+[data-theme="dark"] input:focus {
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.2);
+}
+
+[data-theme="dark"] .btn {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .btn:hover:not(:disabled) {
+  background: #333;
+}
+
+[data-theme="dark"] .btn.primary {
+  background: #2f80ed;
+  color: white;
+  border-color: #2f80ed;
+}
+
+[data-theme="dark"] .btn.primary:hover:not(:disabled) {
+  background: #2563be;
+}
+
+[data-theme="dark"] .btn.danger {
+  background: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}
+
+[data-theme="dark"] .btn.danger:hover {
+  background: #d9363e;
+}
+
+[data-theme="dark"] .notice.success {
+  background: #1a3d1a;
+  border-color: #2d5a2d;
+  color: #7ec87e;
+}
+
+[data-theme="dark"] .notice.error {
+  background: #3d1f1f;
+  border-color: #5a2a2a;
+  color: #ff6b6b;
+}
+
+[data-theme="dark"] .loading,
+[data-theme="dark"] .empty {
+  color: #999;
+}
+
+[data-theme="dark"] .courses-table {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .courses-table th {
+  background: #2a2a2a;
+  color: #f0f0f0;
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .courses-table td {
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .courses-table tbody tr:hover {
+  background: #2a2a2a;
+}
 </style>

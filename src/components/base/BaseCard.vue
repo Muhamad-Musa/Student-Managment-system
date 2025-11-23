@@ -157,16 +157,22 @@ const cardClasses = computed(() => {
 
 /* Dark theme */
 [data-theme="dark"] .base-card {
-  background: #1e1e1e;
-  border-color: #333;
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
 }
 
 [data-theme="dark"] .base-card__header,
 [data-theme="dark"] .base-card__footer {
-  border-color: #333;
+  border-color: #444;
+  background: #1e1e1e;
 }
 
 [data-theme="dark"] .base-card__title {
   color: #f0f0f0;
+}
+
+[data-theme="dark"] .base-card__body {
+  color: #e0e0e0;
 }
 </style>

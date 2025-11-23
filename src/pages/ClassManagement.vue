@@ -230,4 +230,51 @@ function studentsInStage(stageId) {
   color: #777;
   font-style: italic;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .stage-management {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .add-stage-form input {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .add-stage-form input::placeholder {
+  color: #666;
+}
+
+[data-theme="dark"] .loading {
+  color: #999;
+}
+
+[data-theme="dark"] .stage-list li {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .stage-list li:hover {
+  background: #333;
+}
+
+[data-theme="dark"] .stage-list li.active {
+  background: #2f80ed;
+  color: white;
+}
+
+[data-theme="dark"] .students-list {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .students-list li {
+  background: #1e1e1e;
+  color: #e0e0e0;
+  border-left-color: #2f80ed;
+}
+
+[data-theme="dark"] .empty-msg {
+  color: #999;
+}
 </style>

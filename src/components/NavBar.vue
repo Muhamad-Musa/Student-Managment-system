@@ -177,10 +177,24 @@ nav a.router-link-active {
 /* Dark theme adjustments */
 :global([data-theme="dark"]) nav {
   background-color: #1a1a1a;
+  border-bottom: 1px solid #444;
+}
+
+:global([data-theme="dark"]) nav a {
+  color: #e0e0e0;
+}
+
+:global([data-theme="dark"]) nav a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 :global([data-theme="dark"]) nav a.router-link-active {
   background-color: #2f80ed;
+  color: white;
+}
+
+:global([data-theme="dark"]) .user-name {
+  color: #e0e0e0;
 }
 
 /* Responsive */

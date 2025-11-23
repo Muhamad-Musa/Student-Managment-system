@@ -224,4 +224,55 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   outline: none;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .dashboard {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] h1 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .loading,
+[data-theme="dark"] .empty-state {
+  color: #999;
+}
+
+[data-theme="dark"] .empty-state {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .recent {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .recent h2 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .recent-table {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .recent-table th {
+  background: #2a2a2a;
+  color: #f0f0f0;
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .recent-table td {
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .nav-btn {
+  background: #2f80ed;
+  color: white;
+}
+
+[data-theme="dark"] .nav-btn:hover,
+[data-theme="dark"] .nav-btn:focus {
+  background: #2563be;
+}
 </style>

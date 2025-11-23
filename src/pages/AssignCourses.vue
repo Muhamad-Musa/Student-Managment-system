@@ -235,4 +235,46 @@ select {
   font-style: italic;
   margin-top: 20px;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .assign-courses {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] label {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] select {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .courses-list {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .course-item {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .course-item label {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .assigned-list {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .assigned-list li {
+  background: #1e1e1e;
+  color: #e0e0e0;
+  border-left-color: #2f80ed;
+}
+
+[data-theme="dark"] .empty-msg {
+  color: #999;
+}
 </style>

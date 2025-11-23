@@ -92,4 +92,39 @@ h1 { margin-bottom: 1rem; }
 .actions { margin-top:1.2rem; display:flex; gap:0.6rem; }
 .btn { padding:0.45rem 0.7rem; border:1px solid #bbb; background:#f5f5f5; border-radius:4px; text-decoration:none; color:#222; cursor:pointer; }
 .btn.danger { background:#ff4d4f; color:white; border-color:#ff4d4f; }
+
+/* Dark Theme */
+[data-theme="dark"] .page {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] h1 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .card {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .row strong {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .btn:hover {
+  background: #333;
+}
+
+[data-theme="dark"] .btn.danger {
+  background: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}
 </style>

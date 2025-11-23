@@ -18,4 +18,9 @@ footer {
   text-align: center;
   margin-top: 2rem;
 }
+
+[data-theme="dark"] footer {
+  background-color: #1a1a1a;
+  border-top: 1px solid #444;
+}
 </style>

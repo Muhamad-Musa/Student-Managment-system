@@ -556,4 +556,116 @@ h2 {
   color: #f39c12;
   font-weight: 600;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .attendance-page {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .loading {
+  color: #999;
+}
+
+[data-theme="dark"] .form-group label {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group input {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .form-group select:focus,
+[data-theme="dark"] .form-group input:focus {
+  border-color: #3498db;
+}
+
+[data-theme="dark"] .no-students {
+  background: #3d3416;
+  border-color: #5a4a1f;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .no-students p {
+  color: #f0ad4e;
+}
+
+[data-theme="dark"] .attendance-table {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .attendance-table thead {
+  background: #2a4a6e;
+}
+
+[data-theme="dark"] .attendance-table th,
+[data-theme="dark"] .attendance-table td {
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .attendance-table tbody tr:hover {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .status-btn {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+[data-theme="dark"] .status-btn:hover {
+  background: #333;
+}
+
+[data-theme="dark"] .status-btn.present.active {
+  background: #27ae60;
+  color: white;
+  border-color: #27ae60;
+}
+
+[data-theme="dark"] .status-btn.absent.active {
+  background: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}
+
+[data-theme="dark"] .status-btn.late.active {
+  background: #f39c12;
+  color: white;
+  border-color: #f39c12;
+}
+
+[data-theme="dark"] .btn {
+  color: white;
+}
+
+[data-theme="dark"] .save-btn:disabled {
+  background: #555;
+}
+
+[data-theme="dark"] .history table {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .history thead {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .history th,
+[data-theme="dark"] .history td {
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .history tbody tr:hover {
+  background: #2a2a2a;
+}
 </style>

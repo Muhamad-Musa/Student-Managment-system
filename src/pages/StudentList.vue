@@ -382,4 +382,115 @@ h1 { margin-bottom: 0.6rem; color: #2c3e50; }
   border-radius: 6px;
   margin-top: 1rem;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .page {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] h1 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .loading {
+  color: #999;
+}
+
+[data-theme="dark"] .controls input.search-input,
+[data-theme="dark"] .controls .stage-filter,
+[data-theme="dark"] .controls .view-toggle {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .controls input.search-input::placeholder {
+  color: #666;
+}
+
+[data-theme="dark"] .btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .btn:hover {
+  background: #333;
+}
+
+[data-theme="dark"] .btn.primary {
+  background: #2f80ed;
+  color: white;
+  border-color: #2f80ed;
+}
+
+[data-theme="dark"] .btn.primary:hover {
+  background: #2563be;
+}
+
+[data-theme="dark"] .students-table {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .students-table th {
+  background: #1e1e1e;
+  color: #f0f0f0;
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .students-table td {
+  border-bottom-color: #444;
+}
+
+[data-theme="dark"] .students-table tr:hover {
+  background: #333;
+}
+
+[data-theme="dark"] .student-card {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .student-card h3 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .student-card p {
+  color: #999;
+}
+
+[data-theme="dark"] .card-actions {
+  border-top-color: #444;
+}
+
+[data-theme="dark"] .empty-state {
+  color: #999;
+}
+
+[data-theme="dark"] .empty-state h3 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .pager span {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .pager button {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .pager button:hover:not(:disabled) {
+  background: #2f80ed;
+  color: white;
+}
+
+[data-theme="dark"] .error-banner {
+  background: #3d1f1f;
+  border-color: #5a2a2a;
+  color: #ff6b6b;
+}
 </style>

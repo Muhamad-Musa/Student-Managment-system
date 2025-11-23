@@ -396,4 +396,84 @@ textarea {
   text-decoration: underline;
   font-weight: 600;
 }
+
+/* Dark Theme */
+[data-theme="dark"] .page {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] h1 {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .form {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] label {
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #666;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: #2f80ed;
+}
+
+[data-theme="dark"] .help-text {
+  color: #999;
+}
+
+[data-theme="dark"] .btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .btn:hover:not(:disabled) {
+  background: #333;
+}
+
+[data-theme="dark"] .btn.primary {
+  background: #2f80ed;
+  color: white;
+  border-color: #2f80ed;
+}
+
+[data-theme="dark"] .btn.primary:hover:not(:disabled) {
+  background: #2563be;
+}
+
+[data-theme="dark"] .notice.success {
+  background: #1a3d1a;
+  border-color: #2d5a2d;
+  color: #7ec87e;
+}
+
+[data-theme="dark"] .notice.error {
+  background: #3d1f1f;
+  border-color: #5a2a2a;
+  color: #ff6b6b;
+}
+
+[data-theme="dark"] .notice a {
+  color: #5ca3ff;
+}
 </style>
