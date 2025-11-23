@@ -173,13 +173,45 @@ export const useStudentStore = defineStore("student", () => {
     }
   };
 
-  const addStage = async (stageName) => {
+  const addStage = async (stageData) => {
     loading.value = true;
     error.value = null;
     try {
-      const newStage = await stageService.addStage(stageName);
+      const newStage = await stageService.addStage(stageData);
       stages.value.push(newStage);
       return newStage;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateStage = async (id, updates) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const updated = await stageService.updateStage(id, updates);
+      const index = stages.value.findIndex((s) => s.id === id);
+      if (index > -1) {
+        stages.value[index] = { ...stages.value[index], ...updates };
+      }
+      return updated;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteStage = async (id) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      await stageService.deleteStage(id);
+      stages.value = stages.value.filter((s) => s.id !== id);
     } catch (err) {
       error.value = err.message;
       throw err;
@@ -262,13 +294,31 @@ export const useStudentStore = defineStore("student", () => {
     }
   };
 
-  const addCourse = async (courseName) => {
+  const addCourse = async (courseData) => {
     loading.value = true;
     error.value = null;
     try {
-      const newCourse = await courseService.addCourse(courseName);
+      const newCourse = await courseService.addCourse(courseData);
       courses.value.push(newCourse);
       return newCourse;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateCourse = async (id, updates) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const updated = await courseService.updateCourse(id, updates);
+      const index = courses.value.findIndex((c) => c.id === id);
+      if (index > -1) {
+        courses.value[index] = { ...courses.value[index], ...updates };
+      }
+      return updated;
     } catch (err) {
       error.value = err.message;
       throw err;
@@ -443,6 +493,77 @@ export const useStudentStore = defineStore("student", () => {
     }
   };
 
+  // New attendance methods for top-level collection
+  const fetchStudentAttendance = async (studentId, courseId = null) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const records = await attendanceService.getStudentAttendance(studentId, courseId);
+      return records;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchCourseAttendance = async (courseId, date = null) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const records = await attendanceService.getCourseAttendance(courseId, date);
+      return records;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const markAttendance = async (attendanceData) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const record = await attendanceService.recordAttendance(attendanceData);
+      return record;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const markBulkAttendance = async (attendanceRecords) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const results = await attendanceService.recordBulkAttendance(attendanceRecords);
+      return results;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const getCoursesByStage = async (stageId) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const stageCourses = await courseService.getCoursesByStage(stageId);
+      return stageCourses;
+    } catch (err) {
+      error.value = err.message;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   // Computed getters
   const totalStudents = computed(() => students.value.length);
   const totalStages = computed(() => stages.value.length);
@@ -477,13 +598,17 @@ export const useStudentStore = defineStore("student", () => {
     // Stage actions
     fetchAllStages,
     addStage,
+    updateStage,
+    deleteStage,
 
     // Course actions
     fetchAllCourses,
     getStudentCourses,
     assignCourses,
     addCourse,
+    updateCourse,
     deleteCourse,
+    getCoursesByStage,
 
     // Enrollment actions
     fetchStudentEnrollments,
@@ -499,5 +624,9 @@ export const useStudentStore = defineStore("student", () => {
     recordAttendance,
     recordBulkAttendance,
     getAttendanceStats,
+    fetchStudentAttendance,
+    fetchCourseAttendance,
+    markAttendance,
+    markBulkAttendance,
   };
 });

@@ -254,17 +254,18 @@ const saveAttendance = async () => {
   try {
     isLoading.value = true
 
-    // Prepare bulk attendance records
+    // Prepare bulk attendance records using NEW structure
     const bulkRecords = recordsToSave.map(item => ({
       studentId: item.studentId,
-      enrollmentId: item.enrollmentId,
-      date: selectedDate.value,
+      courseId: selectedCourseId.value, // Use the selected course ID
+      date: new Date(selectedDate.value).toISOString(),
       status: item.status,
-      notes: ''
+      notes: '',
+      markedBy: 'instructor'
     }))
 
-    // Save using bulk method
-    await store.recordBulkAttendance(bulkRecords)
+    // Save using NEW bulk method
+    await store.markBulkAttendance(bulkRecords)
 
     // Add to history
     const presentCount = recordsToSave.filter(r => r.status === 'Present').length

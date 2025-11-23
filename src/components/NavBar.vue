@@ -5,10 +5,10 @@
         <li><router-link to="/">Dashboard</router-link></li>
         <li><router-link to="/students">Students</router-link></li>
         <li v-if="canAddStudent"><router-link to="/add-student">Add Student</router-link></li>
-        <li v-if="authStore.isAdmin"><router-link to="/class-management">Classes</router-link></li>
+        <li v-if="authStore.isAdmin"><router-link to="/manage-stages">Stages</router-link></li>
+        <li v-if="authStore.isAdmin"><router-link to="/manage-courses">Courses</router-link></li>
         <li v-if="canAssignCourses"><router-link to="/assign-courses">Assign Courses</router-link></li>
         <li v-if="canManageAttendance"><router-link to="/attendance">Attendance</router-link></li>
-        <li v-if="authStore.isAdmin"><router-link to="/manage-courses">Courses</router-link></li>
       </ul>
       
       <div class="nav-actions">

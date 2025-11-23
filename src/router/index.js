@@ -9,7 +9,7 @@ import Dashboard from '../pages/Dashboard.vue'
 const StudentList = () => import('../pages/StudentList.vue')
 const AddStudent = () => import('../pages/AddStudent.vue')
 const StudentDetails = () => import('../pages/StudentDetails.vue')
-const ClassManagement = () => import('../pages/ClassManagement.vue')
+const ManageStages = () => import('../pages/ManageStages.vue')
 const ManageCourses = () => import('../pages/ManageCourses.vue')
 const AssignCourses = () => import('../pages/AssignCourses.vue')
 const AttendanceTracking = () => import('../pages/AttendanceTracking.vue')
@@ -47,9 +47,9 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/class-management',
-    name: 'ClassManagement',
-    component: ClassManagement,
+    path: '/manage-stages',
+    name: 'ManageStages',
+    component: ManageStages,
     meta: { requiresAuth: true, roles: ['admin'] }
   },
   {

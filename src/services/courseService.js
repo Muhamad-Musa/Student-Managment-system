@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   query,
+  where,
   orderBy,
 } from 'firebase/firestore'
 import { db } from '../config/firebase'
@@ -51,15 +52,20 @@ export const courseService = {
   },
 
   // Add new course
-  async addCourse(courseName) {
+  async addCourse(courseData) {
     try {
       const docRef = await addDoc(collection(db, COURSES_COLLECTION), {
-        name: courseName,
+        name: courseData.name,
+        code: courseData.code || '',
+        credits: courseData.credits || 3,
+        stageId: courseData.stageId || null,
+        instructorName: courseData.instructorName || '',
+        description: courseData.description || '',
         createdAt: new Date().toISOString(),
       })
       return {
         id: docRef.id,
-        name: courseName,
+        ...courseData,
       }
     } catch (error) {
       console.error('Error adding course:', error)
@@ -90,6 +96,25 @@ export const courseService = {
       return id
     } catch (error) {
       console.error('Error deleting course:', error)
+      throw error
+    }
+  },
+
+  // Get courses by stage
+  async getCoursesByStage(stageId) {
+    try {
+      const q = query(
+        collection(db, COURSES_COLLECTION),
+        where('stageId', '==', stageId),
+        orderBy('name')
+      )
+      const querySnapshot = await getDocs(q)
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+    } catch (error) {
+      console.error('Error fetching courses by stage:', error)
       throw error
     }
   },

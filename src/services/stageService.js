@@ -19,7 +19,7 @@ export const stageService = {
     try {
       const q = query(
         collection(db, STAGES_COLLECTION),
-        orderBy('name')
+        orderBy('level')
       )
       const querySnapshot = await getDocs(q)
       return querySnapshot.docs.map(doc => ({
@@ -51,15 +51,17 @@ export const stageService = {
   },
 
   // Add new stage
-  async addStage(stageName) {
+  async addStage(stageData) {
     try {
       const docRef = await addDoc(collection(db, STAGES_COLLECTION), {
-        name: stageName,
+        name: stageData.name,
+        level: stageData.level || 1,
+        academicYear: stageData.academicYear || new Date().getFullYear().toString(),
         createdAt: new Date().toISOString(),
       })
       return {
         id: docRef.id,
-        name: stageName,
+        ...stageData,
       }
     } catch (error) {
       console.error('Error adding stage:', error)

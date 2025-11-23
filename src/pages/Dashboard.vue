@@ -49,15 +49,6 @@
       <div v-else-if="!isLoading" class="empty-state">No students yet</div>
       <div v-else>Loading students...</div>
     </div>
-    <!-- Navigation Buttons -->
-    <div class="nav-buttons">
-      <router-link to="/students" class="nav-btn" aria-label="View all students">👥 View All Students</router-link>
-      <router-link to="/add-student" class="nav-btn" aria-label="Add a new student">➕ Add Student</router-link>
-      <router-link to="/class-management" class="nav-btn" aria-label="Manage stages">🏫 Manage Stages</router-link>
-      <router-link to="/manage-courses" class="nav-btn" aria-label="Manage courses">📘 Manage Courses</router-link>
-      <router-link to="/assign-courses" class="nav-btn" aria-label="Assign courses">✏️ Assign Courses</router-link>
-      <router-link to="/attendance" class="nav-btn" aria-label="View attendance">📅 Attendance</router-link>
-    </div>
   </div>
 </template>
 
@@ -199,31 +190,6 @@ h1 {
   background: #f0f0f0;
   font-weight: bold;
 }
-.nav-buttons {
-  margin-top: 30px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-}
-.nav-btn {
-  display: block;
-  background: #2f80ed;
-  color: white;
-  text-decoration: none;
-  padding: 12px 16px;
-  border-radius: 6px;
-  text-align: center;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.nav-btn:hover,
-.nav-btn:focus {
-  background: #2563be;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  outline: none;
-}
 
 /* Dark Theme */
 [data-theme="dark"] .dashboard {
@@ -264,15 +230,5 @@ h1 {
 
 [data-theme="dark"] .recent-table td {
   border-bottom-color: #444;
-}
-
-[data-theme="dark"] .nav-btn {
-  background: #2f80ed;
-  color: white;
-}
-
-[data-theme="dark"] .nav-btn:hover,
-[data-theme="dark"] .nav-btn:focus {
-  background: #2563be;
 }
 </style>

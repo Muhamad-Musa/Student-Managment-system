@@ -7,11 +7,45 @@
       <h2>Add New Course</h2>
       <form @submit.prevent="onAddCourse" class="form">
         <BaseInput
-          v-model="newCourseName"
+          v-model="newCourse.name"
           label="Course Name"
           placeholder="e.g., Mathematics"
-          :error="errors.courseName"
+          :error="errors.name"
           required
+        />
+        <BaseInput
+          v-model="newCourse.code"
+          label="Course Code"
+          placeholder="e.g., MATH101"
+          :error="errors.code"
+        />
+        <BaseInput
+          v-model.number="newCourse.credits"
+          label="Credits"
+          type="number"
+          placeholder="e.g., 3"
+          min="1"
+          max="10"
+        />
+        <BaseSelect
+          v-model="newCourse.stageId"
+          label="Academic Stage"
+          :error="errors.stageId"
+          placeholder="Select a stage (optional)"
+        >
+          <option v-for="stage in store.stages" :key="stage.id" :value="stage.id">
+            {{ stage.name }} (Level {{ stage.level || 1 }})
+          </option>
+        </BaseSelect>
+        <BaseInput
+          v-model="newCourse.instructorName"
+          label="Instructor Name"
+          placeholder="e.g., Dr. Smith"
+        />
+        <BaseInput
+          v-model="newCourse.description"
+          label="Description"
+          placeholder="Course description"
         />
         <div class="form-actions">
           <BaseButton variant="primary" type="submit" :disabled="store.loading" :loading="store.loading">
@@ -38,6 +72,10 @@
         <thead>
           <tr>
             <th>Course Name</th>
+            <th>Code</th>
+            <th>Credits</th>
+            <th>Stage</th>
+            <th>Instructor</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -45,7 +83,20 @@
           <tr v-for="course in store.courses" :key="course.id">
             <td>
               <strong>{{ course.name }}</strong>
-              <BaseBadge variant="info" size="small">{{ course.credits || 3 }} credits</BaseBadge>
+              <p v-if="course.description" class="description">{{ course.description }}</p>
+            </td>
+            <td>
+              <BaseBadge v-if="course.code" variant="info" size="small">{{ course.code }}</BaseBadge>
+              <span v-else class="no-data">—</span>
+            </td>
+            <td>{{ course.credits || 3 }}</td>
+            <td>
+              <span v-if="course.stageId">{{ getStageName(course.stageId) }}</span>
+              <span v-else class="no-data">—</span>
+            </td>
+            <td>
+              <span v-if="course.instructorName">{{ course.instructorName }}</span>
+              <span v-else class="no-data">—</span>
             </td>
             <td class="actions">
               <BaseButton variant="danger" size="small" @click="confirmDelete(course.id)">Delete</BaseButton>
@@ -58,43 +109,59 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useStudentStore } from "../stores/studentStore";
 import { useNotification } from "../composables/useNotification";
-import { BaseInput, BaseButton, BaseBadge } from "../components/base";
+import { BaseInput, BaseButton, BaseBadge, BaseSelect } from "../components/base";
 
 const store = useStudentStore();
 const { success, error: notifyError } = useNotification();
 
-const newCourseName = ref("");
-const errors = ref({ courseName: "" });
+const newCourse = ref({
+  name: "",
+  code: "",
+  credits: 3,
+  stageId: "",
+  instructorName: "",
+  description: "",
+});
+const errors = ref({ name: "", code: "", stageId: "" });
 const successMessage = ref("");
 const errorMessage = ref("");
 
-// Load courses on mount
+// Get stage name by ID
+function getStageName(stageId) {
+  const stage = store.stages.find(s => s.id === stageId);
+  return stage ? stage.name : 'Unknown';
+}
+
+// Load data on mount
 onMounted(async () => {
   try {
-    await store.fetchAllCourses();
+    await Promise.all([
+      store.fetchAllCourses(),
+      store.fetchAllStages()
+    ]);
   } catch (err) {
-    errorMessage.value = "Failed to load courses";
+    errorMessage.value = "Failed to load data";
   }
 });
 
 // Add course
 async function onAddCourse() {
-  errors.value.courseName = "";
+  errors.value = { name: "", code: "", stageId: "" };
   errorMessage.value = "";
   successMessage.value = "";
 
-  if (!newCourseName.value.trim()) {
-    errors.value.courseName = "Course name is required";
+  if (!newCourse.value.name.trim()) {
+    errors.value.name = "Course name is required";
     return;
   }
 
   try {
-    await store.addCourse(newCourseName.value.trim());
-    successMessage.value = `Course "${newCourseName.value}" added successfully!`;
-    success(`Course "${newCourseName.value}" added!`);
+    await store.addCourse(newCourse.value);
+    successMessage.value = `Course "${newCourse.value.name}" added successfully!`;
+    success(`Course "${newCourse.value.name}" added!`);
     resetForm();
   } catch (err) {
     errorMessage.value = "Failed to add course: " + err.message;
@@ -121,8 +188,15 @@ async function deleteCourse(courseId) {
 
 // Reset form
 function resetForm() {
-  newCourseName.value = "";
-  errors.value.courseName = "";
+  newCourse.value = {
+    name: "",
+    code: "",
+    credits: 3,
+    stageId: "",
+    instructorName: "",
+    description: "",
+  };
+  errors.value = { name: "", code: "", stageId: "" };
   successMessage.value = "";
 }
 </script>
@@ -296,6 +370,17 @@ input:focus {
   font-size: 0.85rem;
 }
 
+.description {
+  margin: 0.3rem 0 0 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.no-data {
+  color: #999;
+  font-style: italic;
+}
+
 /* Dark Theme */
 [data-theme="dark"] .page {
   color: #e0e0e0;
@@ -394,5 +479,13 @@ input:focus {
 
 [data-theme="dark"] .courses-table tbody tr:hover {
   background: #2a2a2a;
+}
+
+[data-theme="dark"] .description {
+  color: #999;
+}
+
+[data-theme="dark"] .no-data {
+  color: #666;
 }
 </style>
