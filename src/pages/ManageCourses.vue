@@ -6,16 +6,18 @@
     <div class="form-section">
       <h2>Add New Course</h2>
       <form @submit.prevent="onAddCourse" class="form">
-        <label>
-          Course Name *
-          <input v-model="newCourseName" type="text" placeholder="e.g., Mathematics" required />
-          <small v-if="errors.courseName" class="error">{{ errors.courseName }}</small>
-        </label>
+        <BaseInput
+          v-model="newCourseName"
+          label="Course Name"
+          placeholder="e.g., Mathematics"
+          :error="errors.courseName"
+          required
+        />
         <div class="form-actions">
-          <button class="btn primary" type="submit" :disabled="store.loading">
-            {{ store.loading ? "Adding..." : "Add Course" }}
-          </button>
-          <button class="btn" type="reset" @click="resetForm">Clear</button>
+          <BaseButton variant="primary" type="submit" :disabled="store.loading" :loading="store.loading">
+            Add Course
+          </BaseButton>
+          <BaseButton variant="secondary" type="reset" @click="resetForm">Clear</BaseButton>
         </div>
       </form>
       <div v-if="successMessage" class="notice success">✅ {{ successMessage }}</div>
@@ -41,9 +43,12 @@
         </thead>
         <tbody>
           <tr v-for="course in store.courses" :key="course.id">
-            <td>{{ course.name }}</td>
+            <td>
+              <strong>{{ course.name }}</strong>
+              <BaseBadge variant="info" size="small">{{ course.credits || 3 }} credits</BaseBadge>
+            </td>
             <td class="actions">
-              <button class="btn danger" @click="confirmDelete(course.id)">Delete</button>
+              <BaseButton variant="danger" size="small" @click="confirmDelete(course.id)">Delete</BaseButton>
             </td>
           </tr>
         </tbody>
@@ -56,6 +61,7 @@
 import { ref, onMounted } from "vue";
 import { useStudentStore } from "../stores/studentStore";
 import { useNotification } from "../composables/useNotification";
+import { BaseInput, BaseButton, BaseBadge } from "../components/base";
 
 const store = useStudentStore();
 const { success, error: notifyError } = useNotification();

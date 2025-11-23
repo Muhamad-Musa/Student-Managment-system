@@ -4,14 +4,15 @@
 
     <!-- Add New Stage -->
     <form @submit.prevent="addStage" class="add-stage-form">
-      <input
+      <BaseInput
         v-model="newStageName"
         placeholder="Enter stage name (e.g., Stage 1, Stage 4A)"
+        label="Stage Name"
         required
       />
-      <button type="submit" :disabled="store.loading">
-        {{ store.loading ? "Adding..." : "Add Stage" }}
-      </button>
+      <BaseButton type="submit" :loading="store.loading">
+        Add Stage
+      </BaseButton>
     </form>
 
     <!-- Stage List -->
@@ -27,6 +28,9 @@
             :class="{ active: selectedStageId === stageItem.id }"
           >
             {{ stageItem.name }}
+            <BaseBadge variant="info" size="small">
+              {{ studentsInStage(stageItem.id).length }} students
+            </BaseBadge>
           </li>
         </ul>
       </div>
@@ -56,17 +60,33 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useStudentStore } from "../stores/studentStore";
+import { useNotification } from "../composables/useNotification";
+import { BaseInput, BaseButton, BaseBadge } from "../components/base";
 
 const store = useStudentStore();
+const { showNotification } = useNotification();
 const newStageName = ref("");
 const selectedStageId = ref(null);
 
-// Load stages on mount
+// Load stages and students on mount
 onMounted(async () => {
   try {
-    await store.fetchAllStages();
+    console.log('🚀 ClassManagement: Loading data...');
+    await Promise.all([
+      store.fetchAllStages(),
+      store.fetchAllStudents()
+    ]);
+    console.log('✅ ClassManagement: Data loaded');
+    console.log('📊 Stages:', store.stages);
+    console.log('👥 Students:', store.students);
+    
+    // Log each student's stage_id
+    store.students.forEach(student => {
+      console.log(`Student: ${student.name}, stage_id: ${student.stage_id}, type: ${typeof student.stage_id}`);
+    });
   } catch (err) {
-    console.error("Failed to load stages");
+    console.error("❌ Failed to load data:", err);
+    showNotification(`Failed to load data: ${err.message}`, 'error');
   }
 });
 
@@ -76,8 +96,10 @@ async function addStage() {
   try {
     await store.addStage(newStageName.value.trim());
     newStageName.value = "";
+    showNotification('Stage added successfully', 'success');
   } catch (err) {
-    console.error("Failed to add stage");
+    console.error("❌ Failed to add stage:", err);
+    showNotification(`Failed to add stage: ${err.message}`, 'error');
   }
 }
 
@@ -88,12 +110,31 @@ const selectedStageName = computed(() => {
 });
 
 // computed: students of selected stage
-const studentsInSelectedStage = computed(() =>
-  store.getStudentsByStage(selectedStageId.value)
-);
+const studentsInSelectedStage = computed(() => {
+  if (!selectedStageId.value) return [];
+  console.log(`🔄 Computed: Getting students for selected stage ${selectedStageId.value}`);
+  const result = store.getStudentsByStage(selectedStageId.value);
+  console.log(`🔄 Computed result:`, result);
+  return result;
+});
 
 function selectStage(stageId) {
   selectedStageId.value = stageId;
+  console.log(`📌 Selected stage: ${stageId}`);
+  console.log(`👥 Students in stage:`, studentsInStage(stageId));
+}
+
+// Helper to get students for a specific stage
+function studentsInStage(stageId) {
+  try {
+    const students = store.getStudentsByStage(stageId);
+    console.log(`🔍 Getting students for stage ${stageId}:`, students);
+    return students;
+  } catch (err) {
+    console.error(`❌ Error getting students for stage ${stageId}:`, err);
+    showNotification(`Error loading students: ${err.message}`, 'error');
+    return [];
+  }
 }
 </script>
 

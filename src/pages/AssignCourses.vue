@@ -4,8 +4,7 @@
 
     <!-- Select student -->
     <div class="form-group">
-      <label for="student">Select Student:</label>
-      <select v-model="selectedStudentId" id="student">
+      <BaseSelect v-model="selectedStudentId" label="Select Student">
         <option value="">-- Choose a student --</option>
         <option
           v-for="student in store.students"
@@ -14,7 +13,7 @@
         >
           {{ student.name }}
         </option>
-      </select>
+      </BaseSelect>
     </div>
 
     <!-- Select courses -->
@@ -32,20 +31,23 @@
             :value="course.id"
             v-model="selectedCourses"
           />
-          <label :for="'course-' + course.id">{{ course.name }}</label>
+          <label :for="'course-' + course.id">
+            {{ course.name }}
+            <BaseBadge variant="info" size="small">{{ course.credits || 3 }} credits</BaseBadge>
+          </label>
         </div>
       </div>
     </div>
 
     <!-- Assign button -->
-    <button
+    <BaseButton
       v-if="selectedStudentId"
-      class="assign-btn"
+      variant="primary"
       @click="assignCourses"
       :disabled="selectedCourses.length === 0"
     >
       Assign Selected Courses
-    </button>
+    </BaseButton>
 
     <!-- Assigned courses -->
     <div v-if="selectedStudent && assignedCourses.length" class="assigned-list">
@@ -53,6 +55,7 @@
       <ul>
         <li v-for="course in assignedCourses" :key="course.id">
           {{ course.name }}
+          <BaseBadge variant="success">Enrolled</BaseBadge>
         </li>
       </ul>
     </div>
@@ -67,6 +70,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useStudentStore } from "../stores/studentStore";
 import { useNotification } from "../composables/useNotification";
+import { BaseSelect, BaseButton, BaseBadge } from "../components/base";
 
 const store = useStudentStore();
 const { success: notifySuccess, error: notifyError } = useNotification();
@@ -96,20 +100,11 @@ const selectedStudent = computed(() =>
 
 const assignedCourses = computed(() => {
   if (!selectedStudentId.value) return [];
-  // store.getStudentCourses returns enrollment objects like:
-  // { id: enrollmentId, course_id, course_name, enrolled_date }
-  // Map them to objects with `id` and `name` so the template can render
-  // course.name as expected. Prefer the full course object when available
-  const enrollments = store.getStudentCourses(selectedStudentId.value) || [];
-  return enrollments.map((enrollment) => {
-    // try to find a course in store.courses for richer data
-    const courseFromStore = store.getCourseById(enrollment.course_id);
-    if (courseFromStore) {
-      return { id: courseFromStore.id, name: courseFromStore.name };
-    }
-    // fallback to the enrollment's stored course_name
-    return { id: enrollment.course_id || enrollment.id, name: enrollment.course_name || 'Unknown Course' };
-  });
+  console.log('🔄 AssignCourses: Computing assigned courses...');
+  // store.getStudentCourses now returns course objects directly
+  const courses = store.getStudentCourses(selectedStudentId.value) || [];
+  console.log('📚 AssignCourses: Got courses:', courses);
+  return courses;
 });
 
 async function assignCourses() {

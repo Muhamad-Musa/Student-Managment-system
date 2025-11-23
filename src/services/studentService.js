@@ -18,17 +18,20 @@ export const studentService = {
   // Get all students
   async getAllStudents() {
     try {
+      console.log('📡 Fetching all students from Firebase...');
       const q = query(
         collection(db, STUDENTS_COLLECTION),
         orderBy('name')
       )
       const querySnapshot = await getDocs(q)
-      return querySnapshot.docs.map(doc => ({
+      const students = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }))
+      console.log(`✅ Fetched ${students.length} students:`, students);
+      return students;
     } catch (error) {
-      console.error('Error fetching students:', error)
+      console.error('❌ Error fetching students:', error)
       throw error
     }
   },
@@ -54,17 +57,20 @@ export const studentService = {
   // Add new student
   async addStudent(studentData) {
     try {
+      console.log('📝 Adding new student:', studentData);
       const docRef = await addDoc(collection(db, STUDENTS_COLLECTION), {
         ...studentData,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
-      return {
+      const newStudent = {
         id: docRef.id,
         ...studentData,
-      }
+      };
+      console.log('✅ Student added successfully:', newStudent);
+      return newStudent;
     } catch (error) {
-      console.error('Error adding student:', error)
+      console.error('❌ Error adding student:', error)
       throw error
     }
   },

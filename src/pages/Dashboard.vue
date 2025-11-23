@@ -39,7 +39,9 @@
           <tbody>
             <tr v-for="student in recentStudents" :key="student.id">
               <td>{{ student.name }}</td>
-              <td>{{ className(student.stage_id) }}</td>
+              <td>
+                <BaseBadge variant="primary" size="small">{{ className(student.stage_id) }}</BaseBadge>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -61,12 +63,20 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { useStudentStore } from "../stores/studentStore";
 import { useNotification } from "../composables/useNotification";
+import { BaseBadge } from "../components/base";
 
+const route = useRoute();
 const store = useStudentStore();
 const { error: notifyError } = useNotification();
 const isLoading = ref(false);
+
+// Check for unauthorized access
+if (route.query.unauthorized) {
+  notifyError("You don't have permission to access that page");
+}
 
 // Computed properties
 const totalStudents = computed(() => store.totalStudents || 0);

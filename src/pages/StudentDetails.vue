@@ -11,7 +11,10 @@
         <strong>Assigned Courses:</strong>
         <div v-if="studentCourses.length">
           <ul>
-            <li v-for="c in studentCourses" :key="c.id">{{ c.name }}</li>
+            <li v-for="c in studentCourses" :key="c.id">
+              {{ c.name }}
+              <BaseBadge variant="info" size="small">{{ c.credits || 3 }} credits</BaseBadge>
+            </li>
           </ul>
         </div>
         <div v-else>— No courses assigned</div>
@@ -19,8 +22,8 @@
 
       <div class="actions">
         <router-link class="btn" to="/students">Back</router-link>
-        <router-link :to="`/assign-courses`" class="btn">Assign Courses</router-link>
-        <button class="btn danger" @click="deleteStudent">Delete Student</button>
+        <BaseButton variant="primary" @click="() => router.push('/assign-courses')">Assign Courses</BaseButton>
+        <BaseButton variant="danger" @click="deleteStudent">Delete Student</BaseButton>
       </div>
     </div>
   </div>
@@ -34,17 +37,36 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
 import { useStudentStore } from '../stores/studentStore'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { BaseButton, BaseBadge } from '../components/base'
 
 const route = useRoute()
 const router = useRouter()
 const store = useStudentStore()
 const id = route.params.id
+
+console.log('📄 StudentDetails: Loading student with id:', id);
 const student = store.getStudentById(id)
+console.log('👤 Student data:', student);
+
+onMounted(async () => {
+  if (student) {
+    console.log('🔄 Fetching enrollments for student:', student.id);
+    try {
+      await store.fetchStudentEnrollments(student.id);
+      console.log('✅ Enrollments loaded');
+    } catch (err) {
+      console.error('❌ Failed to load enrollments:', err);
+    }
+  }
+});
 
 const studentCourses = computed(() => {
   if (!student) return []
-  return store.getStudentCourses(student.id)
+  console.log('🔄 Computing student courses...');
+  const courses = store.getStudentCourses(student.id);
+  console.log('📚 Computed courses:', courses);
+  return courses;
 })
 
 function className(stageId) {

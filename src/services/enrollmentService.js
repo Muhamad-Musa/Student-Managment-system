@@ -17,17 +17,20 @@ export const enrollmentService = {
   // Get all enrollments for a student
   async getStudentEnrollments(studentId) {
     try {
+      console.log(`📡 EnrollmentService: Fetching enrollments for student ${studentId}`);
       const q = query(
         collection(db, STUDENTS_COLLECTION, studentId, ENROLLMENTS_SUBCOLLECTION),
         orderBy('enrolled_date', 'desc')
       )
       const querySnapshot = await getDocs(q)
-      return querySnapshot.docs.map(doc => ({
+      const enrollments = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }))
+      console.log(`✅ EnrollmentService: Found ${enrollments.length} enrollments:`, enrollments);
+      return enrollments;
     } catch (error) {
-      console.error('Error fetching enrollments:', error)
+      console.error('❌ EnrollmentService: Error fetching enrollments:', error)
       throw error
     }
   },

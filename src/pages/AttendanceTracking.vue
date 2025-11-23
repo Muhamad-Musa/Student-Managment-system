@@ -9,8 +9,12 @@
 
     <!-- Select course -->
     <div v-if="!isLoading" class="form-group">
-      <label for="course">Select Course:</label>
-      <select v-model.number="selectedCourseId" id="course" @change="handleCourseChange">
+      <BaseSelect 
+        v-model="selectedCourseId" 
+        id="course" 
+        @change="handleCourseChange"
+        label="Select Course"
+      >
         <option value="">-- Choose a course --</option>
         <option
           v-for="course in store.courses"
@@ -19,7 +23,7 @@
         >
           {{ course.name }}
         </option>
-      </select>
+      </BaseSelect>
     </div>
 
     <!-- Show students enrolled in course -->
@@ -28,8 +32,7 @@
       
       <!-- Select date -->
       <div class="form-group">
-        <label for="date">Select Date:</label>
-        <input type="date" v-model="selectedDate" id="date" />
+        <BaseInput type="date" v-model="selectedDate" id="date" label="Select Date" />
       </div>
 
       <!-- Attendance Table -->
@@ -45,27 +48,32 @@
           <tbody>
             <tr v-for="item in attendanceData" :key="item.studentId">
               <td>{{ item.studentName }}</td>
-              <td>{{ item.stageName }}</td>
+              <td>
+                <BaseBadge variant="info" size="small">{{ item.stageName }}</BaseBadge>
+              </td>
               <td>
                 <div class="status-buttons">
-                  <button
+                  <BaseButton
                     @click="setStatus(item.studentId, 'Present')"
-                    :class="['status-btn', 'present', { active: item.status === 'Present' }]"
+                    :variant="item.status === 'Present' ? 'success' : 'secondary'"
+                    size="small"
                   >
                     ✓ Present
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     @click="setStatus(item.studentId, 'Absent')"
-                    :class="['status-btn', 'absent', { active: item.status === 'Absent' }]"
+                    :variant="item.status === 'Absent' ? 'danger' : 'secondary'"
+                    size="small"
                   >
                     ✗ Absent
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     @click="setStatus(item.studentId, 'Late')"
-                    :class="['status-btn', 'late', { active: item.status === 'Late' }]"
+                    :variant="item.status === 'Late' ? 'warning' : 'secondary'"
+                    size="small"
                   >
                     ⏰ Late
-                  </button>
+                  </BaseButton>
                 </div>
               </td>
             </tr>
@@ -74,10 +82,12 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <button @click="markAllPresent" class="btn mark-all">Mark All Present</button>
-          <button @click="saveAttendance" class="btn save-btn" :disabled="!hasAnyStatus">
+          <BaseButton @click="markAllPresent" variant="primary">
+            Mark All Present
+          </BaseButton>
+          <BaseButton @click="saveAttendance" variant="success" :disabled="!hasAnyStatus">
             💾 Save Attendance
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -119,9 +129,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStudentStore } from '../stores/studentStore'
 import { useNotification } from '../composables/useNotification'
+import { BaseInput, BaseButton, BaseSelect, BaseBadge } from '../components/base'
 
 const store = useStudentStore()
-const { showNotification } = useNotification()
+const { success, error: notifyError, info } = useNotification()
 
 const isLoading = ref(false)
 const selectedCourseId = ref('')
@@ -158,22 +169,30 @@ const handleCourseChange = async () => {
   
   if (!selectedCourseId.value) return
   
+  console.log(`📅 Attendance: Selected course ${selectedCourseId.value}`);
+  
   // Fetch enrollments for all students to populate the list
   isLoading.value = true
   try {
     const enrolled = []
     
+    console.log(`👥 Checking ${store.students.length} students for enrollment...`);
+    
     // Fetch enrollments for each student and check if they have this course
     for (const student of store.students) {
+      console.log(`🔍 Checking student: ${student.name} (${student.id})`);
       await store.fetchStudentEnrollments(student.id)
       
-      // Get their enrollments
-      const enrollments = store.studentEnrollments[student.id] || []
+      // Get their enrollments - use the getter method instead of direct access
+      const studentCourses = store.getStudentCourses(student.id) || [];
+      console.log(`📚 Student ${student.name} courses:`, studentCourses);
       
-      // Check if they're enrolled in the selected course
-      const hasThisCourse = enrollments.find(
-        enrollment => enrollment.course_id === selectedCourseId.value
+      // Check if they're enrolled in the selected course by checking course IDs
+      const hasThisCourse = studentCourses.find(
+        course => String(course.id) === String(selectedCourseId.value)
       )
+      
+      console.log(`${hasThisCourse ? '✅' : '❌'} Student ${student.name} enrolled in this course:`, hasThisCourse);
       
       if (hasThisCourse) {
         enrolled.push({
@@ -188,12 +207,14 @@ const handleCourseChange = async () => {
     
     // Set attendance data with the enrolled students
     attendanceData.value = enrolled
+    console.log(`✅ Found ${enrolled.length} students enrolled in this course`);
     
     if (enrolled.length === 0) {
-      showNotification('No students enrolled in this course', 'info')
+      info('No students enrolled in this course')
     }
-  } catch (error) {
-    showNotification('Failed to load enrollments: ' + error.message, 'error')
+  } catch (err) {
+    console.error('❌ Failed to load enrollments:', err);
+    notifyError('Failed to load enrollments: ' + err.message)
   } finally {
     isLoading.value = false
   }
@@ -212,13 +233,13 @@ const markAllPresent = () => {
   attendanceData.value.forEach(item => {
     item.status = 'Present'
   })
-  showNotification('All students marked as present', 'success')
+  success('All students marked as present')
 }
 
 // Save attendance to database
 const saveAttendance = async () => {
   if (!selectedDate.value) {
-    showNotification('Please select a date', 'error')
+    notifyError('Please select a date')
     return
   }
 
@@ -226,7 +247,7 @@ const saveAttendance = async () => {
   const recordsToSave = attendanceData.value.filter(item => item.status !== null)
 
   if (recordsToSave.length === 0) {
-    showNotification('Please mark attendance for at least one student', 'error')
+    notifyError('Please mark attendance for at least one student')
     return
   }
 
@@ -258,7 +279,7 @@ const saveAttendance = async () => {
       lateCount
     })
 
-    showNotification(`Attendance saved for ${recordsToSave.length} students`, 'success')
+    success(`Attendance saved for ${recordsToSave.length} students`)
 
     // Reset for next entry
     attendanceData.value.forEach(item => {
@@ -266,8 +287,8 @@ const saveAttendance = async () => {
     })
     selectedDate.value = ''
 
-  } catch (error) {
-    showNotification('Failed to save attendance: ' + error.message, 'error')
+  } catch (err) {
+    notifyError('Failed to save attendance: ' + err.message)
   } finally {
     isLoading.value = false
   }
@@ -279,8 +300,8 @@ onMounted(async () => {
     await store.fetchAllStudents()
     await store.fetchAllCourses()
     await store.fetchAllStages()
-  } catch (error) {
-    showNotification('Failed to load data: ' + error.message, 'error')
+  } catch (err) {
+    notifyError('Failed to load data: ' + err.message)
   } finally {
     isLoading.value = false
   }

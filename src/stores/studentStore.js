@@ -28,7 +28,11 @@ export const useStudentStore = defineStore("student", () => {
   };
 
   const getCourseById = (id) => {
-    return courses.value.find((c) => String(c.id) === String(id));
+    console.log(`🔍 Looking for course with id: ${id}, type: ${typeof id}`);
+    console.log(`📚 Available courses in store:`, courses.value.map(c => ({ id: c.id, name: c.name })));
+    const course = courses.value.find((c) => String(c.id) === String(id));
+    console.log(`${course ? '✅' : '❌'} Course found:`, course);
+    return course;
   };
 
   // Actions - Students
@@ -36,8 +40,11 @@ export const useStudentStore = defineStore("student", () => {
     loading.value = true;
     error.value = null;
     try {
+      console.log('🏪 Store: Fetching all students...');
       students.value = await studentService.getAllStudents();
+      console.log(`🏪 Store: Loaded ${students.value.length} students into state`);
     } catch (err) {
+      console.error('❌ Store: Error fetching students:', err);
       error.value = err.message;
       throw err;
     } finally {
@@ -46,13 +53,24 @@ export const useStudentStore = defineStore("student", () => {
   };
 
   const addStudent = async (student) => {
+    // Optimistic update: add student immediately with temporary ID
+    const tempId = `temp_${Date.now()}`;
+    const optimisticStudent = { ...student, id: tempId };
+    students.value.push(optimisticStudent);
+    
     loading.value = true;
     error.value = null;
     try {
       const newStudent = await studentService.addStudent(student);
-      students.value.push(newStudent);
+      // Replace temp student with real one
+      const index = students.value.findIndex((s) => s.id === tempId);
+      if (index > -1) {
+        students.value[index] = newStudent;
+      }
       return newStudent;
     } catch (err) {
+      // Rollback: remove optimistic student
+      students.value = students.value.filter((s) => s.id !== tempId);
       error.value = err.message;
       throw err;
     } finally {
@@ -61,16 +79,25 @@ export const useStudentStore = defineStore("student", () => {
   };
 
   const updateStudent = async (id, updates) => {
+    // Optimistic update: apply changes immediately
+    const index = students.value.findIndex((s) => String(s.id) === String(id));
+    let originalStudent = null;
+    
+    if (index > -1) {
+      originalStudent = { ...students.value[index] };
+      students.value[index] = { ...students.value[index], ...updates };
+    }
+    
     loading.value = true;
     error.value = null;
     try {
       const updated = await studentService.updateStudent(id, updates);
-      const index = students.value.findIndex((s) => String(s.id) === String(id));
-      if (index > -1) {
-        students.value[index] = { ...students.value[index], ...updates };
-      }
       return updated;
     } catch (err) {
+      // Rollback: restore original student
+      if (index > -1 && originalStudent) {
+        students.value[index] = originalStudent;
+      }
       error.value = err.message;
       throw err;
     } finally {
@@ -79,12 +106,24 @@ export const useStudentStore = defineStore("student", () => {
   };
 
   const deleteStudent = async (id) => {
+    // Optimistic update: remove student immediately
+    const index = students.value.findIndex((s) => String(s.id) === String(id));
+    let removedStudent = null;
+    
+    if (index > -1) {
+      removedStudent = students.value[index];
+      students.value = students.value.filter((s) => String(s.id) !== String(id));
+    }
+    
     loading.value = true;
     error.value = null;
     try {
       await studentService.deleteStudent(id);
-      students.value = students.value.filter((s) => String(s.id) !== String(id));
     } catch (err) {
+      // Rollback: restore deleted student
+      if (removedStudent) {
+        students.value.splice(index, 0, removedStudent);
+      }
       error.value = err.message;
       throw err;
     } finally {
@@ -92,12 +131,31 @@ export const useStudentStore = defineStore("student", () => {
     }
   };
 
-  const getStudentsByStage = async (stageId) => {
+  const getStudentsByStage = (stageId) => {
     try {
-      return await studentService.getStudentsByStage(stageId);
+      // Filter from already loaded students instead of querying Firebase
+      // This avoids the need for a composite index
+      console.log(`🔍 Filtering students for stage_id: ${stageId}, type: ${typeof stageId}`);
+      console.log(`📊 Total students in store: ${students.value.length}`);
+      
+      if (students.value.length > 0) {
+        console.log('📝 Sample student data:', students.value[0]);
+      }
+      
+      const filtered = students.value.filter(s => {
+        const match = s.stage_id === stageId || String(s.stage_id) === String(stageId);
+        if (match) {
+          console.log(`✓ Match found: ${s.name} (stage_id: ${s.stage_id})`);
+        }
+        return match;
+      });
+      console.log(`✅ Found ${filtered.length} students in stage ${stageId}:`, filtered);
+      
+      return filtered.sort((a, b) => a.name.localeCompare(b.name));
     } catch (err) {
+      console.error('❌ Error filtering students by stage:', err);
       error.value = err.message;
-      throw err;
+      return [];
     }
   };
 
@@ -135,8 +193,11 @@ export const useStudentStore = defineStore("student", () => {
     loading.value = true;
     error.value = null;
     try {
+      console.log('🏪 Store: Fetching all courses...');
       courses.value = await courseService.getAllCourses();
+      console.log(`🏪 Store: Loaded ${courses.value.length} courses:`, courses.value);
     } catch (err) {
+      console.error('❌ Store: Error fetching courses:', err);
       error.value = err.message;
       throw err;
     } finally {
@@ -146,8 +207,23 @@ export const useStudentStore = defineStore("student", () => {
 
   const getStudentCourses = (studentId) => {
     // Get enrollments for this student
+    console.log(`🔍 Getting courses for student ${studentId}`);
     const enrollments = studentEnrollments.value[String(studentId)] || [];
-    return enrollments;
+    console.log(`📚 Found ${enrollments.length} enrollments:`, enrollments);
+    
+    // Map enrollments to course objects
+    const coursesWithDetails = enrollments.map(enrollment => {
+      const course = getCourseById(enrollment.course_id);
+      console.log(`📖 Mapping enrollment ${enrollment.id} -> course ${enrollment.course_id}:`, course);
+      return course || { 
+        id: enrollment.course_id, 
+        name: enrollment.course_name || 'Unknown Course',
+        credits: 3 
+      };
+    }).filter(c => c !== null);
+    
+    console.log(`✅ Returning ${coursesWithDetails.length} courses:`, coursesWithDetails);
+    return coursesWithDetails;
   };
 
   const assignCourses = async (studentId, courseIds) => {
@@ -220,10 +296,13 @@ export const useStudentStore = defineStore("student", () => {
     loading.value = true;
     error.value = null;
     try {
+      console.log(`📡 Fetching enrollments for student ${studentId}...`);
       const enrollments = await enrollmentService.getStudentEnrollments(String(studentId));
+      console.log(`✅ Fetched ${enrollments.length} enrollments:`, enrollments);
       studentEnrollments.value[String(studentId)] = enrollments;
       return enrollments;
     } catch (err) {
+      console.error(`❌ Error fetching enrollments for student ${studentId}:`, err);
       error.value = err.message;
       throw err;
     } finally {
