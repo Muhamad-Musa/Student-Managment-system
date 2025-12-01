@@ -79,6 +79,7 @@
     <PaymentModal 
       :show="showPaymentModal"
       :payment-id="paymentData.paymentId"
+      :readable-code="paymentData.readableCode"
       :qr-code="paymentData.qrCode"
       :amount="paymentData.amount"
       :personal-app-link="paymentData.personalAppLink"
@@ -132,6 +133,7 @@ const paymentStage = ref('requesting') // requesting, qr, processing, success, e
 const paymentError = ref('')
 const paymentData = reactive({
   paymentId: '',
+  readableCode: '',
   qrCode: '',
   amount: 1,
   personalAppLink: '',
@@ -271,6 +273,7 @@ async function initiatePayment(studentData) {
     
     // Update payment data
     paymentData.paymentId = payment.paymentId
+    paymentData.readableCode = payment.readableCode
     paymentData.qrCode = payment.qrCode
     paymentData.personalAppLink = payment.personalAppLink
     paymentData.businessAppLink = payment.businessAppLink
@@ -375,6 +378,7 @@ function cancelPayment() {
   paymentStage.value = 'requesting'
   paymentError.value = ''
   paymentData.paymentId = ''
+  paymentData.readableCode = ''
   paymentData.qrCode = ''
   pendingStudentData.value = null
 }

@@ -19,7 +19,7 @@
         
         <div class="payment-info">
           <p><strong>Amount:</strong> {{ formatAmount(amount) }} IQD</p>
-          <p><strong>Payment ID:</strong> {{ paymentId }}</p>
+          <p><strong>Payment Code:</strong> {{ readableCode || paymentId }}</p>
         </div>
         
         <div class="payment-links">
@@ -78,6 +78,10 @@ const props = defineProps({
     default: false
   },
   paymentId: {
+    type: String,
+    default: ''
+  },
+  readableCode: {
     type: String,
     default: ''
   },
