@@ -64,7 +64,7 @@
         <BaseButton variant="primary" type="submit" :disabled="isSubmitting" :loading="isSubmitting">
           <span v-if="!isSubmitting">✅ Submit</span>
         </BaseButton>
-        <BaseButton variant="secondary" type="reset" :disabled="isSubmitting">🔄 Reset</BaseButton>
+        <BaseButton variant="default" type="reset" :disabled="isSubmitting">🔄 Reset</BaseButton>
         <router-link class="btn" to="/students">← Back</router-link>
       </div>
     </form>
@@ -74,6 +74,21 @@
       <router-link :to="`/student/${createdId}`">View Details</router-link>
     </div>
     <div v-if="errorMessage" class="notice error">❌ {{ errorMessage }}</div>
+
+    <!-- Payment Modal -->
+    <PaymentModal 
+      :show="showPaymentModal"
+      :payment-id="paymentData.paymentId"
+      :qr-code="paymentData.qrCode"
+      :amount="paymentData.amount"
+      :personal-app-link="paymentData.personalAppLink"
+      :business-app-link="paymentData.businessAppLink"
+      :stage="paymentStage"
+      :error-message="paymentError"
+      :can-retry="true"
+      @cancel="cancelPayment"
+      @retry="retryPayment"
+    />
   </div>
 </template>
 
@@ -82,6 +97,8 @@ import { reactive, ref, onMounted } from 'vue'
 import { useStudentStore } from '../stores/studentStore'
 import { useNotification } from '../composables/useNotification'
 import { BaseInput, BaseSelect, BaseButton } from '../components/base'
+import PaymentModal from '../components/PaymentModal.vue'
+import { fibPaymentService } from '../services/fibPaymentService'
 
 const store = useStudentStore()
 const { success: notifySuccess, error: notifyError } = useNotification()
@@ -108,6 +125,19 @@ const errorMessage = ref('')
 const createdId = ref(null)
 const createdName = ref('')
 const isSubmitting = ref(false)
+
+// Payment state
+const showPaymentModal = ref(false)
+const paymentStage = ref('requesting') // requesting, qr, processing, success, error
+const paymentError = ref('')
+const paymentData = reactive({
+  paymentId: '',
+  qrCode: '',
+  amount: 1,
+  personalAppLink: '',
+  businessAppLink: ''
+})
+const pendingStudentData = ref(null)
 
 // Validation rules
 const validateField = (field) => {
@@ -206,26 +236,152 @@ async function onSubmit() {
       studentData.address = form.address.trim()
     }
     
-    const student = await store.addStudent(studentData)
+    // Store student data for later use after payment
+    pendingStudentData.value = studentData
+    
+    // Initiate payment process
+    await initiatePayment(studentData)
+    
+  } catch (err) {
+    errorMessage.value = err?.message || 'Failed to initiate payment'
+    notifyError(errorMessage.value)
+    isSubmitting.value = false
+  }
+}
+
+async function initiatePayment(studentData) {
+  try {
+    console.log('Starting payment initiation...')
+    
+    // Show payment modal and set stage to requesting
+    showPaymentModal.value = true
+    paymentStage.value = 'requesting'
+    paymentError.value = ''
+    
+    console.log('Creating payment request...')
+    
+    // Create payment request
+    const payment = await fibPaymentService.createPayment({
+      amount: 1, // 1 IQD for student registration
+      description: `Student Registration: ${studentData.name}`,
+      correlationId: `STU-${Date.now()}`
+    })
+    
+    console.log('Payment created:', payment)
+    
+    // Update payment data
+    paymentData.paymentId = payment.paymentId
+    paymentData.qrCode = payment.qrCode
+    paymentData.personalAppLink = payment.personalAppLink
+    paymentData.businessAppLink = payment.businessAppLink
+    
+    // Move to QR code display stage
+    paymentStage.value = 'qr'
+    
+    // Start polling for payment status
+    waitForPaymentCompletion(payment.paymentId)
+    
+  } catch (err) {
+    console.error('Payment initiation error:', err)
+    paymentStage.value = 'error'
+    paymentError.value = err?.message || 'Failed to create payment request'
+    isSubmitting.value = false
+  }
+}
+
+async function waitForPaymentCompletion(paymentId) {
+  try {
+    // Poll for payment status
+    const result = await fibPaymentService.waitForPayment(paymentId, 60, 5000)
+    
+    if (result.success) {
+      // Payment successful, move to processing stage
+      paymentStage.value = 'processing'
+      
+      // Add the student to the system
+      await addStudentAfterPayment()
+      
+    } else {
+      // Payment failed
+      paymentStage.value = 'error'
+      paymentError.value = `Payment ${result.reason || 'failed'}. Please try again.`
+      isSubmitting.value = false
+    }
+    
+  } catch (err) {
+    console.error('Payment verification error:', err)
+    paymentStage.value = 'error'
+    paymentError.value = err?.message || 'Payment verification failed'
+    isSubmitting.value = false
+  }
+}
+
+async function addStudentAfterPayment() {
+  try {
+    const student = await store.addStudent(pendingStudentData.value)
+    
+    // Payment and registration successful
+    paymentStage.value = 'success'
     
     saved.value = true
     createdId.value = student.id
     createdName.value = student.name
     
-    notifySuccess(`Student "${student.name}" created successfully!`)
+    notifySuccess(`Payment successful! Student "${student.name}" registered!`)
     
-    // Reset form
-    onReset()
-    
-    // Auto-hide success message after 5 seconds
+    // Close modal after a delay
     setTimeout(() => {
-      saved.value = false
-    }, 5000)
+      showPaymentModal.value = false
+      onReset()
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        saved.value = false
+      }, 5000)
+    }, 2000)
+    
   } catch (err) {
-    errorMessage.value = err?.message || 'Failed to create student'
-    notifyError(errorMessage.value)
+    console.error('Student registration error:', err)
+    paymentStage.value = 'error'
+    paymentError.value = 'Payment successful but student registration failed. Please contact support.'
+    notifyError(paymentError.value)
   } finally {
     isSubmitting.value = false
+  }
+}
+
+function cancelPayment() {
+  // Store payment ID before clearing
+  const paymentId = paymentData.paymentId
+  
+  // Cancel payment on FIB if payment ID exists
+  if (paymentId) {
+    fibPaymentService.cancelPayment(paymentId)
+      .then(() => fibPaymentService.checkPaymentStatus(paymentId))
+      .then(status => {
+        console.log('Payment cancelled. Final status:', status.status)
+        notifyError(`Payment cancelled (Status: ${status.status})`)
+      })
+      .catch(err => {
+        console.error('Failed to cancel payment:', err)
+        notifyError('Payment cancelled')
+      })
+  } else {
+    notifyError('Payment cancelled')
+  }
+  
+  showPaymentModal.value = false
+  isSubmitting.value = false
+  paymentStage.value = 'requesting'
+  paymentError.value = ''
+  paymentData.paymentId = ''
+  paymentData.qrCode = ''
+  pendingStudentData.value = null
+}
+
+function retryPayment() {
+  if (pendingStudentData.value) {
+    initiatePayment(pendingStudentData.value)
   }
 }
 
